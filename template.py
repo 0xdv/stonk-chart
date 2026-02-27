@@ -28,10 +28,18 @@ HTML_TEMPLATE = """\
         textStyle: {{ color: '#e0e0e0' }}
       }},
       tooltip: {{
-        trigger: 'axis',
+        trigger: 'item',
+        axisPointer: {{
+          type: 'cross',
+          crossStyle: {{ color: '#888' }},
+          lineStyle: {{ color: '#888', type: 'dashed' }}
+        }},
         formatter: function(params) {{
-          var p = params[0];
-          return p.name + '<br/>Close: $' + p.value.toFixed(2);
+          if (params.componentType === 'markPoint') {{
+            var d = params.data;
+            return d.tooltip ? d.tooltip.formatter : d.value;
+          }}
+          return params.name + '<br/>Close: $' + params.value.toFixed(2);
         }}
       }},
       xAxis: {{
@@ -50,7 +58,9 @@ HTML_TEMPLATE = """\
         type: 'line',
         data: prices,
         smooth: false,
-        symbol: 'none',
+        symbol: 'circle',
+        symbolSize: 4,
+        showSymbol: false,
         lineStyle: {{ width: 2, color: '#00b4d8' }},
         areaStyle: {{
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [

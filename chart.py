@@ -24,6 +24,14 @@ def _build_markers(extreme_records: list[dict]) -> list[dict]:
         is_up = rec["pct"] > 0
         days = rec["days"]
         label_text = f"{rec['pct']:+.1f}% ({days}d)"
+        start = rec["start_date"]
+        end = rec["end_date"]
+        span_str = f"{start} → {end}" if start != end else start
+        tooltip_html = (
+            f"<b>{span_str}</b><br/>"
+            f"{'▲' if is_up else '▼'} {rec['pct']:+.1f}% over {days} day{'s' if days > 1 else ''}<br/>"
+            f"Close: ${rec['price']:.2f}"
+        )
         markers.append({
             "coord": [rec["date"], rec["price"]],
             "value": label_text,
@@ -39,6 +47,7 @@ def _build_markers(extreme_records: list[dict]) -> list[dict]:
                 "fontSize": 11,
                 "fontWeight": "bold",
             },
+            "tooltip": {"formatter": tooltip_html},
         })
     return markers
 
