@@ -122,7 +122,10 @@ def annotate_events(
                 print(f"           [{art_date}] [{source}] {title}")
         else:
             print(f"         No news articles found.")
-        rec["headlines"] = [n["title"] for n in news[:3]]
+        rec["headlines"] = [
+            f"[{n['source']}] {n['title']}" if n.get("source") else n["title"]
+            for n in news[:3]
+        ]
 
         summary = summarise(
             company_name, ticker, search_date, rec["pct"], news

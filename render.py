@@ -7,6 +7,14 @@ from typing import Optional
 from template import HTML_TEMPLATE
 
 
+def build_spans(extreme_records: list[dict]) -> list[dict]:
+    """Extract span start/end/direction for JS-side gradient markArea rendering."""
+    return [
+        {"start": rec["start_date"], "end": rec["end_date"], "up": rec["pct"] > 0}
+        for rec in extreme_records
+    ]
+
+
 def build_markers(extreme_records: list[dict]) -> list[dict]:
     """Convert extreme-move span records into ECharts markPoint data."""
     markers = []
@@ -35,7 +43,7 @@ def build_markers(extreme_records: list[dict]) -> list[dict]:
             "coord": [rec["date"], rec["price"]],
             "value": label_text,
             "symbol": "triangle",
-            "symbolSize": 20,
+            "symbolSize": 10,
             "symbolRotate": 0 if is_up else 180,
             "itemStyle": {"color": "#00e676" if is_up else "#ff1744"},
             "label": {
@@ -73,11 +81,13 @@ def render_html(
         output:          Path to write the HTML file.
     """
     markers = build_markers(extreme_records)
+    spans = build_spans(extreme_records)
     html = HTML_TEMPLATE.format(
         ticker=ticker,
         range_label=range_label,
         dates=json.dumps(dates),
         prices=json.dumps(prices),
         markers=json.dumps(markers),
+        spans=json.dumps(spans),
     )
     output.write_text(html)

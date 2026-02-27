@@ -21,6 +21,29 @@ HTML_TEMPLATE = """\
     var dates = {dates};
     var prices = {prices};
     var markers = {markers};
+    var spans = {spans};
+    var spanSeries = spans.map(function(s) {{
+      var upColor = new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+        {{ offset: 0, color: 'rgba(0,230,118,0.30)' }},
+        {{ offset: 1, color: 'rgba(0,230,118,0.03)' }}
+      ]);
+      var dnColor = new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+        {{ offset: 0, color: 'rgba(255,23,68,0.30)' }},
+        {{ offset: 1, color: 'rgba(255,23,68,0.03)' }}
+      ]);
+      var data = dates.map(function(d, i) {{
+        return (d >= s.start && d <= s.end) ? prices[i] : null;
+      }});
+      return {{
+        type: 'line',
+        data: data,
+        silent: true,
+        showSymbol: false,
+        lineStyle: {{ opacity: 0 }},
+        areaStyle: {{ color: s.up ? upColor : dnColor }},
+        z: 1
+      }};
+    }});
     chart.setOption({{
       title: {{
         text: '{ticker} — Closing Price ({range_label})',
@@ -56,7 +79,7 @@ HTML_TEMPLATE = """\
         axisLabel: {{ color: '#aaa', formatter: '$ {{value}}' }},
         splitLine: {{ lineStyle: {{ color: '#333' }} }}
       }},
-      series: [{{
+      series: spanSeries.concat([{{
         type: 'line',
         data: prices,
         smooth: false,
@@ -72,13 +95,13 @@ HTML_TEMPLATE = """\
         }},
         markPoint: {{
           symbol: 'triangle',
-          symbolSize: 18,
+          symbolSize: 9,
           data: markers,
           label: {{
             show: false
           }}
         }}
-      }}],
+      }}]),
       backgroundColor: '#1a1a2e',
       grid: {{ left: 80, right: 40, top: 60, bottom: 40 }}
     }});

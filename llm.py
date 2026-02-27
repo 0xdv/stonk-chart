@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import random
+import re
 import time
 from typing import Optional
 
@@ -56,6 +57,27 @@ def _build_prompt(
     )
 
 
+def _clean_llm_response(text: str) -> str:
+    """Strip LLM formatting noise from a response string.
+
+    Removes:
+    - Leading ``Cause:`` / ``cause:`` label
+    - Markdown bold/italic markers (``**``, ``*``, ``__``, ``_``)
+    - Surrounding quotes (``"…"``, ``'…'``, ``"…"``, ``'…'``)
+    - Extra whitespace / newlines
+    """
+    text = text.strip()
+    # Remove leading "Cause:" label (case-insensitive, optional space)
+    text = re.sub(r"(?i)^cause\s*:\s*", "", text)
+    # Strip markdown bold/italic markers
+    text = re.sub(r"\*{1,2}|_{1,2}", "", text)
+    # Strip surrounding straight or curly quotes
+    text = re.sub(r'^["\u201c\u2018\']+|["\u201d\u2019\']+$', "", text)
+    # Collapse whitespace
+    text = " ".join(text.split())
+    return text
+
+
 def summarise(
     company_name: str,
     ticker: str,
@@ -84,8 +106,6 @@ def summarise(
 
     prompt = _build_prompt(company_name, ticker, date, pct_change, news_items)
 
-    print(prompt)
-
     from g4f.client import Client
 
     for attempt in range(1, retries + 1):
@@ -98,10 +118,9 @@ def summarise(
             )
             text = response.choices[0].message.content
             if text:
-                words = text.strip().strip('"').split()
-                summary = " ".join(words[:12])
-                if len(summary) > 5 and company_name.lower() not in summary.lower()[:15] or True:
-                    return summary
+                text = _clean_llm_response(text)
+                if text:
+                    return text
         except Exception as exc:
             if attempt == retries:
                 print(f"  ⚠ LLM summarisation failed after {retries} attempts: {exc}")
