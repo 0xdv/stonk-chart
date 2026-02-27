@@ -7,6 +7,10 @@ them with relevant real-world events.
 
 **Output format:** Self-contained `.html` file (no server needed, just open in browser).
 
+### Implementation guideline
+If any source file exceeds **150 lines**, treat it as a signal to split it into
+smaller modules (e.g. separate data fetching, analysis, rendering, CLI).
+
 ---
 
 ## V0 — PoC (Proof of Concept)
