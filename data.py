@@ -38,16 +38,22 @@ def download_prices(
     return df, range_label
 
 
-def find_extreme_moves(df: pd.DataFrame, top_n: int = 5) -> list[dict]:
-    """Identify the top-N most extreme *consecutive* price moves.
+def find_extreme_moves(
+    df: pd.DataFrame,
+    min_pct: float = 5.0,
+    top_n: Optional[int] = None,
+) -> list[dict]:
+    """Identify all *consecutive* price moves that exceed a minimum threshold.
 
     A "span" is a streak of consecutive trading days where the daily
     change stays in the same direction (all positive or all negative).
-    Spans are ranked by absolute cumulative percentage change.
+    All spans whose absolute cumulative move >= min_pct are returned,
+    sorted by absolute move descending.  Pass top_n to cap the result.
 
     Args:
-        df:    DataFrame with a "Close" column (DatetimeIndex).
-        top_n: Number of extreme spans to return.
+        df:      DataFrame with a "Close" column (DatetimeIndex).
+        min_pct: Minimum absolute cumulative % move to include (default 5.0).
+        top_n:   Optional hard cap on number of results.
 
     Returns:
         List of dicts with keys:
@@ -77,9 +83,12 @@ def find_extreme_moves(df: pd.DataFrame, top_n: int = 5) -> list[dict]:
     if span_start is not None:
         spans.append(_make_span(df, span_start, prev_idx))
 
-    # rank by absolute cumulative move
+    # filter by threshold, then rank by absolute cumulative move
+    spans = [s for s in spans if abs(s["pct"]) >= min_pct]
     spans.sort(key=lambda s: abs(s["pct"]), reverse=True)
-    return spans[:top_n]
+    if top_n is not None:
+        spans = spans[:top_n]
+    return spans
 
 
 def _make_span(df: pd.DataFrame, start, end) -> dict:
