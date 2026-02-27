@@ -29,6 +29,8 @@ HTML_TEMPLATE = """\
       }},
       tooltip: {{
         trigger: 'item',
+        confine: true,
+        extraCssText: 'max-width: 350px; white-space: normal;',
         axisPointer: {{
           type: 'cross',
           crossStyle: {{ color: '#888' }},

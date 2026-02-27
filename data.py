@@ -6,6 +6,8 @@ from typing import Optional
 import pandas as pd
 import yfinance as yf
 
+from cache import load_prices, save_prices
+
 
 def download_prices(
     ticker: str,
@@ -25,6 +27,13 @@ def download_prices(
     end_dt = datetime.strptime(end, "%Y-%m-%d") if end else datetime.today()
     start_dt = datetime.strptime(start, "%Y-%m-%d") if start else end_dt - timedelta(days=365)
     range_label = f"{start_dt:%Y-%m-%d} → {end_dt:%Y-%m-%d}"
+    start_str = f"{start_dt:%Y-%m-%d}"
+    end_str = f"{end_dt:%Y-%m-%d}"
+
+    cached = load_prices(ticker, start_str, end_str)
+    if cached is not None:
+        print(f"Using cached {ticker} data ({range_label})")
+        return cached, range_label
 
     print(f"Downloading {ticker} data ({range_label})…")
     df = yf.download(ticker, start=start_dt, end=end_dt, auto_adjust=True)
@@ -35,6 +44,7 @@ def download_prices(
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
 
+    save_prices(ticker, start_str, end_str, df)
     return df, range_label
 
 
