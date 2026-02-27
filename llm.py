@@ -2,8 +2,21 @@
 
 from __future__ import annotations
 
+import random
 import time
 from typing import Optional
+
+_SMART_MODELS = [
+    "gpt-4o",
+    "gpt-4.1",
+    "gemini-2.5-pro",
+    "grok-3",
+    "deepseek-r1",
+    "o3-mini",
+]
+
+
+_MAX_BODY_CHARS = 300  # max chars of body text per news item
 
 
 def _build_prompt(
@@ -13,17 +26,33 @@ def _build_prompt(
     pct_change: float,
     news_items: list[dict],
 ) -> str:
-    """Build a prompt asking the LLM to summarise the cause of a price move."""
+    """Build a prompt asking the LLM to identify the cause of a price move."""
     direction = "rose" if pct_change > 0 else "dropped"
-    headlines = "\n".join(
-        f"- {item['title']} ({item.get('source', '?')})" for item in news_items
-    )
+
+    news_blocks = []
+    for item in news_items:
+        title = item.get("title", "").strip()
+        body = item.get("body", item.get("text", item.get("summary", ""))).strip()
+        source = item.get("source", "?")
+        if body:
+            body_snippet = body[:_MAX_BODY_CHARS]
+            if len(body) > _MAX_BODY_CHARS:
+                body_snippet += "…"
+            news_blocks.append(f"[{source}] {title}\n  {body_snippet}")
+        else:
+            news_blocks.append(f"[{source}] {title}")
+
+    news_text = "\n\n".join(news_blocks)
+
     return (
-        f"{company_name} ({ticker}) stock {direction} {abs(pct_change):.1f}% "
-        f"around {date}.\n\n"
-        f"Here are relevant news headlines:\n{headlines}\n\n"
-        f"In ≤10 words, summarise the most likely cause of this price move. "
-        f"Reply ONLY with the summary, no extra text."
+        f"On {date}, {company_name} ({ticker}) stock {direction} {abs(pct_change):.1f}%.\n\n"
+        f"Your task: identify the ROOT CAUSE of this price move based on the news below.\n\n"
+        f"News articles:\n{news_text}\n\n"
+        f"Instructions:\n"
+        f"- Focus on the specific event, announcement, or factor that most directly caused the move.\n"
+        f"- If multiple causes, pick the most impactful one.\n"
+        f"- Reply in ≤10 words. No intro, no explanation, just the cause.\n"
+        f"Cause:"
     )
 
 
@@ -55,12 +84,15 @@ def summarise(
 
     prompt = _build_prompt(company_name, ticker, date, pct_change, news_items)
 
+    print(prompt)
+
     from g4f.client import Client
 
     for attempt in range(1, retries + 1):
         try:
             client = Client()
             response = client.chat.completions.create(
+                # model=random.choice(_SMART_MODELS),
                 model="",
                 messages=[{"role": "user", "content": prompt}],
             )
