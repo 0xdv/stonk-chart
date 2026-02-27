@@ -15,7 +15,7 @@
 5. Renders a dark-themed **ECharts** line chart with annotated markers and rich tooltips
 6. Outputs a single **self-contained `.html`** file — no server, just open in browser
 
-![Demo screenshot](https://0xdv.github.io/stonk-chart/preview.png)
+![Demo screenshot](docs/preview.png)
 
 ---
 
