@@ -2,7 +2,7 @@
 V3 — Annotated stock chart with news/event lookup and LLM summaries.
 - Accept ticker, date range, and N as function arguments
 - Detect biggest price moves (consecutive same-direction spans)
-- Search DuckDuckGo for news around the start of each span
+- Search Google News for news around the start of each span
 - Summarise the cause with g4f (free GPT)
 - Render ECharts chart with event labels and rich tooltips
 """

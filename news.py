@@ -82,7 +82,7 @@ def annotate_events(
 ) -> list[dict]:
     """Enrich extreme-move records with news headlines and LLM summaries.
 
-    For each record, searches DuckDuckGo for news around the *start* date
+    For each record, searches Google News for news around the *start* date
     of the price span, then asks an LLM to summarise the cause.
 
     Args:
