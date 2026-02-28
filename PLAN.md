@@ -38,7 +38,7 @@ smaller modules (e.g. separate data fetching, analysis, rendering, CLI).
 
 ## V3 — News / Event Lookup
 **Goal:** Replace placeholder labels with real event descriptions.
-- Use DuckDuckGo search (`duckduckgo-search`, no API key)
+- Use Google News RSS search (no API key)
 - Query: `"{company name} stock {date}"` → extract top headline
 - Truncate to ≤10 words
 - Show event text in tooltip and as markPoint label

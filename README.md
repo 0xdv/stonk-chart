@@ -10,7 +10,7 @@
 
 1. Downloads OHLCV data via **yfinance** (no API key needed)
 2. Detects the biggest consecutive price moves above your threshold
-3. Searches **DuckDuckGo** for news around each move
+3. Searches **Google News** for news around each move
 4. Summarises the cause in ≤10 words using a **free LLM** (g4f)
 5. Renders a dark-themed **ECharts** line chart with annotated markers and rich tooltips
 6. Outputs a single **self-contained `.html`** file — no server, just open in browser
@@ -50,7 +50,7 @@ python chart.py AMZN --output amzn.html --no-open
 | `--min-pct` / `-p` | `5.0` | Minimum absolute % move to annotate |
 | `--top` / `-n` | all | Cap number of annotations |
 | `--output` / `-o` | `chart.html` | Output HTML path |
-| `--no-news` | — | Skip DuckDuckGo search & LLM |
+| `--no-news` | — | Skip Google News search & LLM |
 | `--no-open` | — | Don't auto-open in browser |
 | `--clear-cache` | — | Delete cached data before running |
 
@@ -69,11 +69,10 @@ python chart.py AAPL
 ```
 yfinance
 pandas
-ddgs
 g4f
 ```
 
-> **Note:** `g4f` uses free/unofficial GPT endpoints. If LLM calls fail, the chart still renders with DuckDuckGo headlines as-is. Pass `--no-news` for fast offline-only mode.
+> **Note:** `g4f` uses free/unofficial GPT endpoints. If LLM calls fail, the chart still renders with Google News headlines as-is. Pass `--no-news` for fast offline-only mode.
 
 ---
 
@@ -84,7 +83,7 @@ yfinance  →  price DataFrame
                 ↓
          find_extreme_moves()   ← consecutive same-direction streaks ≥ min_pct%
                 ↓
-         annotate_events()      ← DuckDuckGo news + g4f one-line summary
+         annotate_events()      ← Google News + g4f one-line summary
                 ↓
          HTML_TEMPLATE          ← ECharts markPoint markers + rich tooltips
                 ↓
@@ -103,7 +102,7 @@ Results are cached under `cache/` so repeated runs are instant:
 stonk-chart/
 ├── chart.py        # CLI entry point + chart builder
 ├── data.py         # yfinance download + extreme-move detection
-├── news.py         # DuckDuckGo search + g4f LLM summarisation
+├── news.py         # Google News search + g4f LLM summarisation
 ├── cache.py        # two-layer file cache (prices + annotations)
 ├── template.py     # ECharts HTML template
 └── requirements.txt
